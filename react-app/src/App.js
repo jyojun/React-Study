@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import Subject from "./components/Subject";
-import Content from "./components/Contents";
+import Control from "./components/Control";
+import ReadContent from "./components/ReadContent";
 import TOC from "./components/TOC";
 import './App.css';
 
@@ -10,6 +11,7 @@ class App extends Component {
     super(props);
     this.state = {
       mode:'read',
+      selected_content_id:2,
       subject:{title:'WEB', sub:'World Wide Web!'},
       welcome:{title:'Welcome', desc:'Hello, React!!'},
       contents:[
@@ -20,33 +22,49 @@ class App extends Component {
     }
   }
   render() {
-    console.log('App render');
+    //console.log('App render');
     var _title, _desc = null;
     if(this.state.mode === 'welcome'){
       _title = this.state.welcome.title;
       _desc = this.state.welcome.desc;
     } else if(this.state.mode === 'read'){
-      _title = this.state.contents[0].title;
-      _desc = this.state.contents[0].desc;
+      var i = 0;
+      while(i < this.state.contents.length){
+        var data = this.state.contents[i];
+        if(data.id === this.state.selected_content_id) {
+          _title = data.title;
+          _desc = data.desc;
+          break;
+        }
+        i = i + 1;
+      }
     }
     return (
       <div className="App">
-        {/* <Subject 
-          title={this.state.subject.title} 
-          sub={this.state.subject.sub}> 
-        </Subject> */}
-        <header>
-          <h1><a href="/" onClick={function(e){
-            console.log(e);
-            e.preventDefault(); // 자동 reload 를 막아줌
-            // this.state.mode = 'welcome'; // 이렇게 하면 react가 state가 변한것을 모름.
+        <Subject 
+          title={this.state.subject.title}
+          sub={this.state.subject.sub}
+          onChangePage = {function(){
+            this.setState({mode:'welcome'});
+          }.bind(this)}
+        >
+        </Subject>
+        <TOC 
+          onChangePage={function(id){
             this.setState({
-              mode:'welcome'
+              mode:'read',
+              selected_content_id:Number(id)
             });
-          }.bind(this)}>{this.state.subject.title}</a></h1>
-          {this.state.subject.sub}
-        </header>
-        <TOC data={this.state.contents}></TOC>
+          }.bind(this)} 
+          data={this.state.contents}
+        ></TOC>
+        <Control onChangeMode={function(_mode){
+          this.setState({
+            mode:_mode
+          })
+        }.bind(this)}></Control>
+
+
         <Content title={_title} desc={_desc}></Content>
       </div>
     );
